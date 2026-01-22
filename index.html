@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenieOps | AI Funnel Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@400;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-950 text-slate-100 p-6 md:p-12">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-12 border-b border-slate-800 pb-8 flex justify-between items-end">
+            <div>
+                <h1 class="text-5xl font-black text-green-400 tracking-tighter uppercase">GenieOps</h1>
+                <p class="text-slate-400 text-lg mt-1">Automated Lead Magnet & Nurturing Engine</p>
+            </div>
+            <div class="hidden md:block">
+                <div class="flex items-center gap-2 text-green-500 font-bold px-4 py-2 bg-green-500/10 rounded-full border border-green-500/20">
+                    <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span>
+                    Engine Live
+                </div>
+            </div>
+        </header>
+        
+        <div id="results" class="grid gap-8">
+            <div class="py-20 text-center animate-pulse text-slate-500 text-xl">Connecting to Orchestrator...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadResults() {
+            const container = document.getElementById('results');
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/v1/lead-magnets-all');
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    container.innerHTML = "<div class='py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl text-slate-500'>No campaigns found. Launch one in Swagger!</div>";
+                    return;
+                }
+
+                container.innerHTML = ""; 
+                data.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = "bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col lg:flex-row mb-10";
+                        
+                        card.innerHTML = `
+                            <div class="p-8 flex-1 border-b lg:border-b-0 lg:border-r border-slate-800">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <span class="text-xs font-black text-green-400 bg-green-400/10 px-3 py-1 rounded-full border border-green-500/20 lowercase">${item.idea_type}</span>
+                                    <span class="text-slate-600 text-[10px] font-bold uppercase tracking-widest">${new Date(item.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <h2 class="text-4xl font-black mb-2 text-white tracking-tighter">${item.idea_title}</h2>
+                                <p class="text-slate-400 mb-8 leading-relaxed italic text-lg max-w-lg">"${item.value_promise}"</p>
+                                
+                                <div class="flex flex-wrap gap-6 items-center">
+                                    <a href="http://localhost:8000/api/v1/preview/${item.id}" target="_blank" 
+                                    class="bg-green-500 hover:bg-green-400 text-slate-950 px-10 py-5 rounded-2xl font-black tracking-tighter transition shadow-xl shadow-green-500/10">
+                                        VIEW LIVE FUNNEL
+                                    </a>
+                                    <div class="px-4 border-l border-slate-800">
+                                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Target Audience</p>
+                                        <p class="text-sm text-slate-300 font-medium">${item.icp_profile}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-8 bg-slate-950/40 lg:w-2/5 flex flex-col">
+                                <h4 class="text-green-400 font-black text-[10px] uppercase tracking-[0.2em] mb-4 flex items-center gap-2 font-mono">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                    LinkedIn Ad Strategy
+                                </h4>
+                                <div class="rounded-2xl overflow-hidden border border-slate-800 mb-4 h-48 bg-slate-900 flex items-center justify-center">
+                                    <img src="${item.linkedin_img || 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg'}" class="w-full h-full object-cover hover:scale-105 transition duration-700">
+                                </div>
+                                <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-inner">
+                                    <p class="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap font-medium font-serif italic line-clamp-6">
+                                        ${item.linkedin_post || 'Visual campaign logic pending generation...'}
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+            } catch (err) {
+                container.innerHTML = `<div class="bg-red-500/10 border border-red-500 p-6 rounded-2xl text-red-500">Connection Error: Ensure FastAPI is running on port 8000.</div>`;
+            }
+        }
+        
+        loadResults();
+        setInterval(loadResults, 10000);
+    </script>
+</body>
+</html>
