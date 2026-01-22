@@ -3,7 +3,8 @@ backend/venv/
 backend/__pycache__/
 backend/*.pyc
 backend/.env
-
+**/__pycache__/
+*.pyc
 # Node
 frontend/node_modules/
 frontend/dist/
